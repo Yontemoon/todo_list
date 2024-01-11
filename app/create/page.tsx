@@ -1,10 +1,10 @@
-import React from 'react';
+import TodoForm from "../ui/todo/TodoForm";
 
 const page = () => {
     return (
-        <div>
-            CREATE PAGE
-        </div>
+        <main>
+            <TodoForm todo={null}/>
+        </main>
     );
 };
 
