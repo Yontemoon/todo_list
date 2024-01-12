@@ -1,9 +1,14 @@
+"use client"
+
 import Link from "next/link"
-import {DATA} from "./data"
 import UpdateTodo from "./ui/todo/UpdateTodo"
 import DeleteTodo from "./ui/todo/DeleteTodo"
+import { useUserContext } from "./providers/UserProvider"
+import { Todo } from "./lib/definitions"
 
 export default function Home() {
+
+  const { data } = useUserContext()
   return (
     <main className="flex min-h-screen flex-col items-center justify-between p-24">
       <Link href="/create">
@@ -27,7 +32,7 @@ export default function Home() {
           </tr>
         </thead>
         <tbody>
-          {DATA?.map((todo) => (
+          {data?.map((todo) => (
             <tr key={todo.id}>
               <td>
                 {todo.task}

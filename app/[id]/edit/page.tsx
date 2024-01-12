@@ -1,13 +1,12 @@
-import { DATA } from "@/app/data";
+"use client"
 import TodoForm from "@/app/ui/todo/TodoForm";
-import Link from "next/link";
+import { useUserContext } from "../../providers/UserProvider"
 
-const page = ({params}: {params: {id: number}}) => {
+const EditPage = ({params}: {params: {id: number | string}}) => {
+    const {data} = useUserContext()
     const id = params.id
-    // console.log(id)
-    // console.log(typeof id)
-    const todo = DATA.find((todo) => todo.id == id)
-    console.log(todo)
+    const todo = data?.find((todo) => todo.id == id)
+
     return (
         <main className="flex justify-center items-center">
             {todo !== undefined && <TodoForm todo={todo}/>}
@@ -15,4 +14,4 @@ const page = ({params}: {params: {id: number}}) => {
     );
 };
 
-export default page;
+export default EditPage;

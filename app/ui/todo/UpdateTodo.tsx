@@ -2,7 +2,7 @@ import Link from "next/link";
 import pencilIcon from "../../icons/pencil-f.svg"
 import Image from "next/image";
 
-const UpdateTodo = ({id}: {id: number}) => {
+const UpdateTodo = ({id}: {id: number | string}) => {
     return (
         <Link
             href={`/${id}/edit`}

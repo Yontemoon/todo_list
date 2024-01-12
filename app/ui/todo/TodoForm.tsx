@@ -1,79 +1,102 @@
-import React from 'react';
-import type { Todo } from '@/app/lib/definitions';
-import Link from 'next/link';
+"use client"
 
-const TodoForm = ({todo = null}: {todo: Todo | null}) => {
+
+import Link from 'next/link';
+import { useFormState } from 'react-dom';
+import { createTodo, editTodo } from "../../lib/action"
+import { useForm, SubmitHandler } from "react-hook-form"
+import { v4 } from 'uuid'
+import { useUserContext } from '@/app/providers/UserProvider';
+import { Todo } from '@/app/lib/definitions';
+
+import { useRouter } from 'next/navigation';
+
+
+type Inputs = {
+    task: string;
+    finish: string;
+    importance: 'Ongoing' | 'Critical' | 'Complete';
+}
+
+const TodoForm = ({todo}: {todo?: Todo | null}) => {   
+    const { setData, data } = useUserContext();
+    const router = useRouter()
+    const { register, handleSubmit, setValue, formState: { errors } } = useForm<Inputs>({
+        defaultValues: {
+          task: todo?.task ?? '',
+          finish: todo?.finish ?? '',
+          importance: todo?.importance ?? 'Ongoing',
+        },
+    });
+    
+    const onSubmit: SubmitHandler<Inputs> = (addTask) => {
+        const newId = v4();
+        const newTask = { id: newId, ...addTask };
+      
+        // Remove the todo from data if it exists
+        const filteredOutData = data?.filter((item) => item.id !== todo?.id);
+      
+        // Combine the filtered data with the new task
+        const newTodos = filteredOutData ? [...filteredOutData, newTask] : [newTask];
+      
+        // Update state and localStorage
+        setData(newTodos);
+        window.localStorage.setItem('LocalStorageData', JSON.stringify(newTodos));
+      
+        // Redirect to the home page
+        router.push('/');
+      };
+
     return (
         <div className="flex justify-center items-center">
-            <form>
+            <form onSubmit={handleSubmit(onSubmit)}>
                 <div>
-                    <label>
+                    <label htmlFor='task'>
                         Task Info: 
                     </label>
                     <input
-                        defaultValue={todo?.task ?? ""}
-                        name="taskInfo"
-                        id="taskInfo"
+                        id="task"
                         className="text-black"
-                        // type="string"
+                        {...register('task', { required: 'Task is required' })}
                     />
                 </div>
+                {errors.task && <span>{errors.task.message}</span>}
                 <div>
-                    <label>
-                        Expected Finish Time: 
-                    </label>
+                    <label htmlFor="finish">Expected Finish Time:</label>
                     <input
-                        defaultValue={todo?.finish ?? ""}
+                        id="finish"
                         className="text-black"
+                        // name="finish"
+                        type="time"
+                        {...register('finish', { required: 'Finish time is required' })}
                     />
+                    {errors.finish && <span>{errors.finish.message}</span>}
                 </div>
                 <fieldset>
-                    <legend>Set the Importance of this task:</legend>
-                    <div>
-                        <input
-                            id="ongoing"
-                            name="importance"
-                            type="radio"
-                            value="ongoing"
-                            defaultChecked={todo?.importance === 'Ongoing'}
-                            // className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                        />
-                        <label>
-                            Ongoing
-                        </label>
+                <legend>Set the Importance of this task:</legend>
+                {['Ongoing', 'Critical', 'Complete'].map(importance => (
+                    <div key={importance}>
+                    <input
+                        id={importance}
+                        // name="importance"
+                        type="radio"
+                        value={importance}
+                        {...register('importance')}
+                    />
+                    <label htmlFor={importance}>{importance}</label>
                     </div>
-                    <div>
-                        <input
-                            id="critical"
-                            name="importance"
-                            type="radio"
-                            value="critical"
-                            defaultChecked={todo?.importance === 'Critical'}
-                            // className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                        />
-                        <label>
-                            Critical
-                        </label>
-                    </div>
-                    <div>
-                        <input
-                            id="complete"
-                            name="importance"
-                            type="radio"
-                            value="complete"
-                            defaultChecked={todo?.importance === 'Complete'}
-                            // className="h-4 w-4 cursor-pointer border-gray-300 bg-gray-100 text-gray-600 focus:ring-2"
-                        />
-                        <label>
-                            Complete
-                        </label>
-                    </div>
+                ))}
                 </fieldset>
                 <div>
                     <Link href="/">Cancel</Link>
+                    {todo ? 
                     <button type="submit">
-                        Finalize Task
+                        Edit Task
+                    </button> :
+                    <button type="submit">
+                        Add New Task
                     </button>
+                    }
                 </div>
 
             </form>
